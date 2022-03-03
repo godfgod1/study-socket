@@ -23,15 +23,21 @@ const sockets = []
 
 wss.on("connection", (socket)=>{
   sockets.push(socket)
+  socket["nickname"] = "Anon"
   console.log('sockets',sockets)
   console.log('Connected to Browser')
-  socket.send('hello!!')
+  socket.send('helloooooo!!')
   socket.on("close", ()=> console.log("Disconnected from the Broswer"))
-  socket.on("message", message =>{
-    sockets.forEach(aSocket =>{
-      aSocket.send(message.toLocaleString('utf8'))
-    })
+  socket.on("message", msg =>{
+    const message = JSON.parse(msg)
+    switch(message.type){
+      case "new_message":
+        sockets.forEach(aSocket =>{
+          aSocket.send(`${socket.nickname}: ${message.payload}`)
+        }) 
+      case "nickname":
+        socket["nickname"] = message.payload
+    } 
   })
 })
-
 server.listen(5000, handleListen)
